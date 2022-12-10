@@ -1,186 +1,111 @@
 #define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>   // РґР»СЏ С„СѓРЅРєС†РёРё РІРІРѕРґР°/РІС‹РІРѕРґР°
+#include <malloc.h>  // Р±РёР±Р»РёРѕС‚РµРєР° РґР»СЏ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ С„СѓРЅРєС†РёРё РІС‹РґРµР»РµРЅРёСЏ РїР°РјСЏС‚Рё
+#include <windows.h> // РґР»СЏ Р·Р°РґР°РЅРёСЏ СЏР·С‹РєР° РєРѕРЅСЃРѕР»Рё
+#include <string.h>  // РґР»СЏ СЂР°Р±РѕС‚С‹ СЃРѕ СЃС‚СЂРѕРєР°РјРё
 #include <stdlib.h>
-#include <stdio.h>   // для функции ввода/вывода
-#include <malloc.h>  // библиотека для использования функции выделения памяти
-#include <windows.h> // для задания языка консоли
-#include <string.h>  // для работы со строками
 
 typedef struct {
-	int data[3]; // год, месяц, день
-	int timeH;   // часы
-	int timeMin; // минуты
-	char adress[50]; // адрес абонента
-	char failures[150]; // характер поломки
-	char status[50]; // состояние заявки
+	int data[3]; // РіРѕРґ, РјРµСЃСЏС†, РґРµРЅСЊ
+	int timeH;   // С‡Р°СЃС‹
+	int timeMin; // РјРёРЅСѓС‚С‹
+	char adress[50]; // Р°РґСЂРµСЃ Р°Р±РѕРЅРµРЅС‚Р°
+	char failures[150]; // С…Р°СЂР°РєС‚РµСЂ РїРѕР»РѕРјРєРё
+	char status[50]; // СЃРѕСЃС‚РѕСЏРЅРёРµ Р·Р°СЏРІРєРё
 }user_data;
 
 void init(user_data* point, int size, int n);
-void put(user_data* point, int size);
 int readfile(char* filename);
-int find(user_data* point, char* adress, char* status, int size);
-void sortdata(user_data* point, int size);
+void put(user_data* point, int size);
 void writefile(user_data* point, char* filename, int size);
-int add(user_data* point, char* filename, int size, int number);
 
 int main() {
 	system("chcp 1251");
-	user_data* point = NULL; // объявление БД
+	user_data* point = NULL; // РѕР±СЉСЏРІР»РµРЅРёРµ Р‘Р”
 	int size, number, n, action;
-	char filename[120], adress[50], status[50]; // массивы для хранения названия файла, адреса абонента, состояния заявки
+	char filename[120], adress[50], status[50]; // РјР°СЃСЃРёРІС‹ РґР»СЏ С…СЂР°РЅРµРЅРёСЏ РЅР°Р·РІР°РЅРёСЏ С„Р°Р№Р»Р°, Р°РґСЂРµСЃР° Р°Р±РѕРЅРµРЅС‚Р°, СЃРѕСЃС‚РѕСЏРЅРёСЏ Р·Р°СЏРІРєРё
 
-	printf("База данных - Техническая поддержка интернет-провайдера\n");
+	printf("Р‘Р°Р·Р° РґР°РЅРЅС‹С… - РўРµС…РЅРёС‡РµСЃРєР°СЏ РїРѕРґРґРµСЂР¶РєР° РёРЅС‚РµСЂРЅРµС‚-РїСЂРѕРІР°Р№РґРµСЂР°\n");
 
 	while (1) {
-		printf("\tМеню\n");
-		printf("\nВыберите действие:\n");
-		printf("1) Ввод данных.....\n");
-		printf("2) Чтение данных из файла.....\n");
-		printf("3) Вывод данных на экран.....\n");
-		printf("4) Поиск данных.....\n");
-		printf("5) Сортировка данных.....\n");
-		printf("6) Запись в файл.....\n");
-		printf("7) Дозапись в файл.....\n");
-		printf("8) Выход из программы.....\n");
-
+		printf("\tРњРµРЅСЋ\n");
+		printf("\nР’С‹Р±РµСЂРёС‚Рµ РґРµР№СЃС‚РІРёРµ:\n");
+		printf("1) Р’РІРѕРґ РґР°РЅРЅС‹С….....\n");
+		printf("2) Р§С‚РµРЅРёРµ РґР°РЅРЅС‹С… РёР· С„Р°Р№Р»Р°.....\n");
+		printf("3) Р’С‹РІРѕРґ РґР°РЅРЅС‹С… РЅР° СЌРєСЂР°РЅ.....\n");
+		printf("4) РџРѕРёСЃРє РґР°РЅРЅС‹С….....\n"); // РІ РїСЂРѕС†РµСЃСЃРµ
+		printf("5) РЎРѕСЂС‚РёСЂРѕРІРєР° РґР°РЅРЅС‹С….....\n"); // РІ РїСЂРѕС†РµСЃСЃРµ
+		printf("6) Р—Р°РїРёСЃСЊ РІ С„Р°Р№Р».....\n");
+		printf("7) Р”РѕР·Р°РїРёСЃСЊ РІ С„Р°Р№Р».....\n"); // РІ РїСЂРѕС†РµСЃСЃРµ
+		printf("0) Р’С‹С…РѕРґ РёР· РїСЂРѕРіСЂР°РјРјС‹.....\n");
 
 		scanf("%d", &action);
 
 		switch (action) {
 		case 0:
-			return -1; // выход из программы
+			return -1; // РІС‹С…РѕРґ РёР· РїСЂРѕРіСЂР°РјРјС‹
 		case 1:
-			system("cls"); // очистка консоли
-			printf("Введите кол-во записей: ");
-			scanf("%d", &size); // ввод
-			point = (user_data*)malloc(size * sizeof(user_data)); // выделение памяти
+			system("cls"); // РѕС‡РёСЃС‚РєР° РєРѕРЅСЃРѕР»Рё
+			printf("Р’РІРµРґРёС‚Рµ РєРѕР»-РІРѕ Р·Р°РїРёСЃРµР№: ");
+			scanf("%d", &size); // РІРІРѕРґ
+			point = (user_data*)malloc(size * sizeof(user_data)); // РІС‹РґРµР»РµРЅРёРµ РїР°РјСЏС‚Рё
 			n = 0;
 			init(point, size, n);
 			break;
 		case 2:
 			system("cls");
-			printf("Введите имя файла, который необходимо прочитать: ");
+			printf("Р’РІРµРґРёС‚Рµ РёРјСЏ С„Р°Р№Р»Р°, РєРѕС‚РѕСЂС‹Р№ РЅРµРѕР±С…РѕРґРёРјРѕ РїСЂРѕС‡РёС‚Р°С‚СЊ: ");
 			scanf("%s", &filename);
 			readfile(filename);
 			break;
 		case 3:
-			if (point == NULL) {   // проверяется наличие БД
-				printf("База данных не найдена.\n");
+			if (point == NULL) {   // РїСЂРѕРІРµСЂСЏРµС‚СЃСЏ РЅР°Р»РёС‡РёРµ Р‘Р”
+				printf("Р‘Р°Р·Р° РґР°РЅРЅС‹С… РЅРµ РЅР°Р№РґРµРЅР°.\n");
 				break;
 			}
 			put(point, size);
 			break;
-		case 4:
-			system("cls");
-			if (point == NULL) {
-				printf("База данных не найдена.\n");
-				break;
-			}
-			else {
-				printf("Пользователь не найден.\n");
-				printf("***************************************************************\n");
-			}
-			break;
-
-			printf("Укажите адреса и состояние заявки: ");
-			scanf("%s%s", &adress, &status);
-
-			printf("***************************************************************\n");
-
-			int k = find(point, adress, status, size);
-			if (k > 0)
-				printf("Дата обращения: %d.%d.%d;\n", point[k].data[1], point[k].data[2], point[k].data[3]);
-			printf("Время обращения: %d:%d;\n", point[k].timeH, point[k].timeMin);
-			printf("Адрес: %s;\n", point[k].adress);
-			printf("Характер неисправности: %s;\n", point[k].failures);
-			printf("Состояние заявки: %s\n", point[k].status);
-
-		case 5:
-			if (point == NULL) {
-				printf("База данных не найдена\n");
-				break;
-			}
-			sortdata(point, size);
-			break;
 		case 6:
 			system("cls");
 			if (point == NULL) {
-				printf("База данных не найдена\n");
+				printf("Р‘Р°Р·Р° РґР°РЅРЅС‹С… РЅРµ РЅР°Р№РґРµРЅР°\n");
 				break;
 			}
-			printf("Введите имя файла для записи: ");
+			printf("Р’РІРµРґРёС‚Рµ РёРјСЏ С„Р°Р№Р»Р° РґР»СЏ Р·Р°РїРёСЃРё: ");
 			scanf("%s", &filename);
 			writefile(point, filename, size);
 			break;
-		case 7:
-			if (point == NULL) {
-				printf("База данных не найдена\n");
-				break;
-			}
-			printf("Введите кол-во пользователей, которых необходимо добавить: ");
-			scanf("%d", &number);
-			n = size;
-			size += number;
-			point = (user_data*)realloc(point, size * sizeof(user_data)); //перераспределение памяти
 		}
-		printf("***************************************************************\n");
-
-		printf("Добавить пользователя\n");
-		printf("...в файл\n");
-		printf("...в БД");
-		scanf("%d", &action);
-
-		printf("***************************************************************\n");
-		if (action == 1) {
-			printf("Введите имя файла для добавления абонента:");
-			scanf("%s", &filename);
-			add(point, filename, size, n);
-		}
-		else if (action == 2) {
-			init(point, size, n);
-		}
-		break;
-		printf("Выполнить невозможно.\n");
 	}
 	printf("***************************************************************\n");
 }
 
-//функция для заполнения БД
+//С„СѓРЅРєС†РёСЏ РґР»СЏ Р·Р°РїРѕР»РЅРµРЅРёСЏ Р‘Р”
 void init(user_data* point, int size, int n) {
 	for (int i = n; i < size; i++) {
 		printf("***************************************************************\n");
-		printf("Введите дату обращения: ");
+		printf("Р’РІРµРґРёС‚Рµ РґР°С‚Сѓ РѕР±СЂР°С‰РµРЅРёСЏ: ");
 		scanf("%d.%d.%d", &point[i].data[0], &point[i].data[1], &point[i].data[2]);
-		printf("Введите время обращения: ");
+		printf("Р’РІРµРґРёС‚Рµ РІСЂРµРјСЏ РѕР±СЂР°С‰РµРЅРёСЏ: ");
 		scanf("%d:%d", &point[i].timeH, &point[i].timeMin);
-		printf("Введите адрес абонента: ");
+		printf("Р’РІРµРґРёС‚Рµ Р°РґСЂРµСЃ Р°Р±РѕРЅРµРЅС‚Р°: ");
 		scanf("%s", &point[i].adress);
-		printf("введите характер поломки: ");
+		printf("РІРІРµРґРёС‚Рµ С…Р°СЂР°РєС‚РµСЂ РїРѕР»РѕРјРєРё: ");
 		scanf("%s", &point[i].failures);
-		printf("Введите состояние заявки: ");
+		printf("Р’РІРµРґРёС‚Рµ СЃРѕСЃС‚РѕСЏРЅРёРµ Р·Р°СЏРІРєРё: ");
 		scanf("%s", &point[i].status);
 		printf("***************************************************************\n");
 	}
 	return point;
 }
-// функция печати
-void put(user_data* point, int size) {
-	for (int i = 0; i < size; i++) {
-		printf("%d.%d.%d", point[i].data[0], point[i].data[1], point[i].data[2]); //дата обращения
-		printf("%d:%d", point[i].timeH, point[i].timeMin);		   //время обращения
-		printf("%s", point[i].adress); //адрес абонента
-		printf("%s", point[i].failures); //характер поломки
-		printf("%s", point[i].status); //статус заявки
-	}
-	printf("\n");
-}
 
-//функция чтения из файла
+//С„СѓРЅРєС†РёСЏ С‡С‚РµРЅРёСЏ РёР· С„Р°Р№Р»Р°
 int readfile(char* filename) {
-	FILE* fp; // объявляем переменную
-	char file[120]; // массив для хранения строки из файла
+	FILE* fp; // РѕР±СЉСЏРІР»СЏРµРј РїРµСЂРµРјРµРЅРЅСѓСЋ
+	char file[120]; // РјР°СЃСЃРёРІ РґР»СЏ С…СЂР°РЅРµРЅРёСЏ СЃС‚СЂРѕРєРё РёР· С„Р°Р№Р»Р°
 	fp = fopen(filename, "r");
 	if (fp != NULL) {
-		printf("Файл успешно открыт.");
+		printf("Р¤Р°Р№Р» СѓСЃРїРµС€РЅРѕ РѕС‚РєСЂС‹С‚.");
 		while (!feof(fp)) {
 			fgets(file, 120, fp);
 			if (!feof(fp)) {
@@ -190,63 +115,43 @@ int readfile(char* filename) {
 		return 1;
 	}
 	else {
-		printf("\nОткрыть файл не удалось.\n");
+		printf("\nРћС‚РєСЂС‹С‚СЊ С„Р°Р№Р» РЅРµ СѓРґР°Р»РѕСЃСЊ.\n");
 		return -1;
 	}
-	fclose(fp); // закрытие файла
+	fclose(fp); // Р·Р°РєСЂС‹С‚РёРµ С„Р°Р№Р»Р°
 }
 
-int find(user_data* point, char* adress, char* status, int size) {
-
+// С„СѓРЅРєС†РёСЏ РїРµС‡Р°С‚Рё
+void put(user_data* point, int size) {
+	for (int i = 0; i < size; i++) {
+		printf("%d.%d.%d", point[i].data[0], point[i].data[1], point[i].data[2]); //РґР°С‚Р° РѕР±СЂР°С‰РµРЅРёСЏ
+		printf("%d:%d", point[i].timeH, point[i].timeMin);		   //РІСЂРµРјСЏ РѕР±СЂР°С‰РµРЅРёСЏ
+		printf("%s", point[i].adress); //Р°РґСЂРµСЃ Р°Р±РѕРЅРµРЅС‚Р°
+		printf("%s", point[i].failures); //С…Р°СЂР°РєС‚РµСЂ РїРѕР»РѕРјРєРё
+		printf("%s", point[i].status); //СЃС‚Р°С‚СѓСЃ Р·Р°СЏРІРєРё
+	}
+	printf("\n");
 }
 
-void sortdata(user_data* point, int size) {
-
-}
-
-// функция записи в файл
+// С„СѓРЅРєС†РёСЏ Р·Р°РїРёСЃРё РІ С„Р°Р№Р»
 void writefile(user_data* point, char* filename, int size) {
 	FILE* fp;
-	if ((fp = fopen(filename, "wt")) == NULL) { //проверяем возможность открыть файл
-		printf("Невозможно открыть файл для записи. \n");
+	if ((fp = fopen(filename, "wt")) == NULL) { //РїСЂРѕРІРµСЂСЏРµРј РІРѕР·РјРѕР¶РЅРѕСЃС‚СЊ РѕС‚РєСЂС‹С‚СЊ С„Р°Р№Р»
+		printf("РќРµРІРѕР·РјРѕР¶РЅРѕ РѕС‚РєСЂС‹С‚СЊ С„Р°Р№Р» РґР»СЏ Р·Р°РїРёСЃРё. \n");
 		printf("***************************************************************\n");
 	}
 	else {
-		printf("Файл успешно открыт.\n");
+		printf("Р¤Р°Р№Р» СѓСЃРїРµС€РЅРѕ РѕС‚РєСЂС‹С‚.\n");
 		for (int i = 0; i < size; i++) {
 			printf("\n%d\n", i + 1);
-			printf("%d.%d.%d", point[i].data[0], point[i].data[1], point[i].data[2]); //дата обращения
-			printf("%d:%d", point[i].timeH, point[i].timeMin); //время обращения
-			printf("%s", point[i].adress); //адрес абонента
-			printf("%s", point[i].failures); //характер поломки
-			printf("%s", point[i].status); //статус заявки
-	}
+			printf("%d.%d.%d", point[i].data[0], point[i].data[1], point[i].data[2]); //РґР°С‚Р° РѕР±СЂР°С‰РµРЅРёСЏ
+			printf("%d:%d", point[i].timeH, point[i].timeMin); //РІСЂРµРјСЏ РѕР±СЂР°С‰РµРЅРёСЏ
+			printf("%s", point[i].adress); //Р°РґСЂРµСЃ Р°Р±РѕРЅРµРЅС‚Р°
+			printf("%s", point[i].failures); //С…Р°СЂР°РєС‚РµСЂ РїРѕР»РѕРјРєРё
+			printf("%s", point[i].status); //СЃС‚Р°С‚СѓСЃ Р·Р°СЏРІРєРё
+		}
 		fclose(fp); //
-		printf("\n Данные записаны в файл.\n");
+		printf("\n Р”Р°РЅРЅС‹Рµ Р·Р°РїРёСЃР°РЅС‹ РІ С„Р°Р№Р».\n");
 		printf("***************************************************************\n");
 	}
-}
-
-//функция добавления данных о новом абоненте
-int add(user_data* point, char* filename, int size, int number) { 
-	FILE* fp;
-	if ((fp = fopen(filename, "a")) == NULL) { //проверка на возможность открыть файл для добавления данных о новом пользователе
-		fprintf(stderr, "Невозможно открыть файл для записи.\n");
-		return -1;
-	}
-	else {
-		init(point, size, number);
-		for (int i = number; i < size; i++) {
-			//...добавление данных из БД в файл...
-			fprintf("\n%d\n", i + 1);
-			fprintf("%d.%d.%d", point[i].data[0], point[i].data[1], point[i].data[2]); //дата обращения
-			fprintf("%d:%d", point[i].timeH, point[i].timeMin);		   //время обращения
-			fprintf("%s", point[i].adress); //адрес абонента
-			fprintf("%s", point[i].failures); //характер поломки
-			fprintf("%s", point[i].status); //статус заявки
-		}
-
-	}
-	fclose(fp);
-	return 1;
 }
