@@ -101,14 +101,14 @@ void init(user_data* point, int size, int n) {
 
 //функция чтения из файла
 int read_file(char* filename) {
-	FILE* fp; // объявляем переменную
+	FILE* f; // объявляем переменную
 	char file[120]; // массив для хранения строки из файла
-	fp = fopen(filename, "r");
-	if (fp != NULL) {
+	f = fopen(filename, "r");
+	if (f != NULL) {
 		printf("Файл успешно открыт.");
-		while (!feof(fp)) {
-			fgets(file, 120, fp);
-			if (!feof(fp)) {
+		while (!feof(f)) {
+			fgets(file, 120, f);
+			if (!feof(f)) {
 				puts(file);
 			}
 		}
@@ -118,7 +118,7 @@ int read_file(char* filename) {
 		printf("\nОткрыть файл не удалось.\n");
 		return -1;
 	}
-	fclose(fp); // закрытие файла
+	fclose(f); // закрытие файла
 }
 
 // функция печати
