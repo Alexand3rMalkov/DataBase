@@ -15,9 +15,9 @@ typedef struct {
 }user_data;
 
 void init(user_data* point, int size, int n);
-int readfile(char* filename);
+int read_file(char* filename);
 void put(user_data* point, int size);
-void writefile(user_data* point, char* filename, int size);
+void write_file(user_data* point, char* filename, int size);
 
 int main() {
 	system("chcp 1251");
@@ -56,7 +56,7 @@ int main() {
 			system("cls");
 			printf("Введите имя файла, который необходимо прочитать: ");
 			scanf("%s", &filename);
-			readfile(filename);
+			read_file(filename);
 			break;
 		case 3:
 			if (point == NULL) {   // проверяется наличие БД
@@ -73,7 +73,7 @@ int main() {
 			}
 			printf("Введите имя файла для записи: ");
 			scanf("%s", &filename);
-			writefile(point, filename, size);
+			write_file(point, filename, size);
 			break;
 		}
 	}
@@ -100,7 +100,7 @@ void init(user_data* point, int size, int n) {
 }
 
 //функция чтения из файла
-int readfile(char* filename) {
+int read_file(char* filename) {
 	FILE* fp; // объявляем переменную
 	char file[120]; // массив для хранения строки из файла
 	fp = fopen(filename, "r");
@@ -135,7 +135,7 @@ void put(user_data* point, int size) {
 }
 
 // функция записи в файл
-void writefile(user_data* point, char* filename, int size) {
+void write_file(user_data* point, char* filename, int size) {
 	FILE* f;
 	if ((f = fopen(filename, "w")) == NULL) { //проверяем возможность открыть файл
 		printf("Невозможно открыть файл для записи. \n");
