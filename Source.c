@@ -124,34 +124,39 @@ int readfile(char* filename) {
 // функция печати
 void put(user_data* point, int size) {
 	for (int i = 0; i < size; i++) {
-		printf("%d.%d.%d", point[i].data[0], point[i].data[1], point[i].data[2]); //дата обращения
-		printf("%d:%d", point[i].timeH, point[i].timeMin);		   //время обращения
-		printf("%s", point[i].adress); //адрес абонента
-		printf("%s", point[i].failures); //характер поломки
-		printf("%s", point[i].status); //статус заявки
+		printf("%d.%d.%d ", point[i].data[0], point[i].data[1], point[i].data[2]); //дата обращения
+		printf("%d:%d ", point[i].timeH, point[i].timeMin);		   //время обращения
+		printf("%s ", point[i].adress); //адрес абонента
+		printf("%s ", point[i].failures); //характер поломки
+		printf("%s \n", point[i].status); //статус заявки
+		printf("\n");
 	}
-	printf("\n");
+	printf("\t");
 }
 
 // функция записи в файл
 void writefile(user_data* point, char* filename, int size) {
-	FILE* fp;
-	if ((fp = fopen(filename, "wt")) == NULL) { //проверяем возможность открыть файл
+	FILE* f;
+	if ((f = fopen(filename, "w")) == NULL) { //проверяем возможность открыть файл
 		printf("Невозможно открыть файл для записи. \n");
 		printf("***************************************************************\n");
+		system("pause");
 	}
 	else {
 		printf("Файл успешно открыт.\n");
 		for (int i = 0; i < size; i++) {
-			printf("\n%d\n", i + 1);
-			printf("%d.%d.%d", point[i].data[0], point[i].data[1], point[i].data[2]); //дата обращения
-			printf("%d:%d", point[i].timeH, point[i].timeMin); //время обращения
-			printf("%s", point[i].adress); //адрес абонента
-			printf("%s", point[i].failures); //характер поломки
-			printf("%s", point[i].status); //статус заявки
+			fprintf(f,"\t%2i.\n", i + 1);
+			fprintf(f,"%d.%d.%d ", point[i].data[0], point[i].data[1], point[i].data[2]); //дата обращения
+			fprintf(f,"%d:%d ", point[i].timeH, point[i].timeMin); //время обращения
+			fprintf(f,"%s ", point[i].adress); //адрес абонента
+			fprintf(f,"%s ", point[i].failures); //характер поломки
+			fprintf(f,"%s ", point[i].status); //статус заявки
+			system("pause");
 		}
-		fclose(fp); //
+		fclose(f); // закрытие файла
 		printf("\n Данные записаны в файл.\n");
 		printf("***************************************************************\n");
+		system("pause");
 	}
+	return 0;
 }
