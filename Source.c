@@ -20,8 +20,15 @@ int read_file(char* filename);
 void put(user_data* point, int size);
 void write_file(user_data* point, char* filename, int size);
 int add(user_data* point, char* filename, int size, int n);
-int search(user_data* point, char* adress, char* status, int size);
-void sort(user_data* point, int size);
+int searchByAddress(user_data* point, char* address, int size);
+int searchByStatus(user_data* point, char* status, int size);
+//компараторы для работы сортировок
+int dateComparator(const user_data* userA, const user_data* userB);
+int timeComparator(const user_data* userA, const user_data* userB);
+void sort_(user_data* point, int size, int (*comparator)(const void*, const void*));
+//сортировки
+void sortByDate(user_data* point, int size);
+void sortByTime(user_data* point, int size);
 
 int main() {
 	system("chcp 1251");
@@ -37,10 +44,12 @@ int main() {
 		printf("1) Ввод данных.....\n");
 		printf("2) Чтение данных из файла.....\n");
 		printf("3) Вывод данных на экран.....\n");
-		printf("4) Поиск данных.....\n"); //и тут еще не сработало
-		printf("5) Сортировка данных.....\n"); // всё еще не сработало
-		printf("6) Запись в файл.....\n");
-		printf("7) Дозапись в файл.....\n");
+		printf("4) Поиск по адресу.....\n");
+		printf("5) Поиск по статусу заявки.....\n");
+		printf("6) Сортировать по дате.....\n");
+		printf("7) Сортировать по времени.....\n");
+		printf("8) Запись в файл.....\n");
+		printf("9) Дозапись в файл.....\n");
 		printf("0) Выход из программы.....\n");
 
 		scanf("%d", &action);
@@ -73,23 +82,45 @@ int main() {
 				printf("База данных не найдена.\n");
 				break;
 			}
-			printf("Укажите адрес абонента и состояние заявки: ");
-			scanf("%s %s", &adress, &status);
+			printf("Укажите адрес абонента: ");
+			scanf("%s", &adress);
 			printf("***************************************************************\n");
-			int a = search(point, adress, status, size);
+			int a = searchByAddress(point, adress, size);
 			if (a >= 0) printf("Дата обращения - %d.%d.%d\t Время обращения - %d:%d\t Адрес абонента - %s\t Характер поломки - %s\t Статус заявки - %s");
 			else {
 				printf("Абонент не найден.\n");
 			}
 			break;
 		case 5:
+			system("cls");
+			if (point == NULL) {   // проверяется наличие БД
+				printf("База данных не найдена.\n");
+				break;
+			}
+			printf("Укажите состояние заявки: ");
+			scanf("%s", &status);
+			printf("***************************************************************\n");
+			int b = searchByStatus(point, status, size);
+			if (b >= 0) printf("Дата обращения - %d.%d.%d\t Время обращения - %d:%d\t Адрес абонента - %s\t Характер поломки - %s\t Статус заявки - %s");
+			else {
+				printf("Абонент не найден.\n");
+			}
+			break;
+		case 6:
 			if (point == NULL) {
 				printf("База данных не найдена.\n");
 				break;
 			}
-			sort(point, size);
+			sortByDate(point, size);
 			break;
-		case 6:
+		case 7:
+			if (point == NULL) {
+				printf("База данных не найдена.\n");
+				break;
+			}
+			sortByTime(point, size);
+			break;
+		case 8:
 			system("cls");
 			if (point == NULL) {
 				printf("База данных не найдена\n");
@@ -99,7 +130,7 @@ int main() {
 			scanf("%s", &filename);
 			write_file(point, filename, size);
 			break;
-		case 7:
+		case 9:
 			if (point == NULL) {
 				printf("База данных не найдена\n");
 				break;
@@ -145,7 +176,7 @@ void init(user_data* point, int size, int n) {
 		scanf("%d:%d", &point[i].timeH, &point[i].timeMin);
 		printf("Введите адрес абонента: ");
 		scanf("%s", &point[i].adress);
-		printf("введите характер поломки: ");
+		printf("Введите характер поломки: ");
 		scanf("%s", &point[i].failures);
 		printf("Введите состояние заявки: ");
 		scanf("%s", &point[i].status);
@@ -163,7 +194,7 @@ int read_file(char* filename) {
 		printf("\nФайл открыт.\n");
 		while (!feof(f)) {
 			fgets(file, 200, f);
-				puts(file);
+			puts(file);
 		}
 		return 1;
 	}
@@ -202,11 +233,11 @@ void write_file(user_data* point, char* filename, int size) {
 		printf("Файл успешно открыт.\n");
 		for (int i = 0; i < size; i++) {
 			fprintf(f, "\n");
-			fprintf(f,"%d.%d.%d ", point[i].data[0], point[i].data[1], point[i].data[2]); //дата обращения
-			fprintf(f,"%d:%d ", point[i].timeH, point[i].timeMin); //время обращения
-			fprintf(f,"%s ", point[i].adress); //адрес абонента
-			fprintf(f,"%s ", point[i].failures); //характер поломки
-			fprintf(f,"%s", point[i].status); //статус заявки
+			fprintf(f, "%d.%d.%d ", point[i].data[0], point[i].data[1], point[i].data[2]); //дата обращения
+			fprintf(f, "%d:%d ", point[i].timeH, point[i].timeMin); //время обращения
+			fprintf(f, "%s ", point[i].adress); //адрес абонента
+			fprintf(f, "%s ", point[i].failures); //характер поломки
+			fprintf(f, "%s", point[i].status); //статус заявки
 			system("pause");
 		}
 		fclose(f); // закрытие файла
@@ -239,47 +270,62 @@ int add(user_data* point, char* filename, int size, int n) {
 	return 1;
 }
 
-// функция поиска абонента
-int search(user_data* point, char* adress, char* status, int size) {
+// возвращает индекс первого найденного с начала абонента из массива
+// point размером size адрес которого равен address
+int searchByAddress(user_data* point, char* address, int size) {
 	int number = -1;
 	for (int i = 0; i < size; i++) {
-		if ((strcmp(adress, point[i].adress) == 0) && (strcmp(status, point[i].status) == 0)) { // проверяем строки на соответствие введенным данным
-			number = i; //запоминаем номер
+		if (strcmp(address, point[i].adress) == 0) { // проверяем строки на соответствие введенным данным
+			return i; //возвращаем номер
 		}
 	}
 	return number;
 }
 
-// функция сортировки по времени и дате
-void sort(user_data* point, int size) {
-	user_data keep;
-	//сортировка по дате
+// возвращает индекс первого найденного с начала абонента из массива
+// point размером size статус которого равен status
+int searchByStatus(user_data* point, char* status, int size) {
+	int number = -1;
 	for (int i = 0; i < size; i++) {
-		for (int j = i + 1; j < size; i++) {
-			if (point[i].data[2] + point[i].data[1] + point[i].data[0] > point[j].data[2] + point[j].data[1] + point[j].data[0]) {
-				keep = point[j];
-				point[j] = point[i];
-				point[i] = keep;
-			}
+		if (strcmp(status, point[i].status) == 0) { // проверяем строки на соответствие введенным данным
+			return i; //возвращаем номер
 		}
 	}
-	//сортировка по времени, есди дата совпадает
-	for (int i = 0; i < size - 1; i++) {
-		if ((point[i].data[2] == point[i + 1].data[2]) && (point[i].data[1] == point[i + 1].data[1]) && (point[i].data[0] == point[i + 1].data[0])) {
-			if (point[i].timeH == point[i + 1].timeH) {
-				if (point[i].timeMin == point[i + 1].timeMin) {
-					keep = point[i + 1];
-					point[i + 1] = point[i];
-					point[i] = keep;
-				}
-			}
-			else if (point[i].timeH > point[i + 1].timeH) {
-				keep = point[i + 1];
-				point[i + 1] = point[i];
-				point[i] = keep;
-			}
-		}
-	}
-	printf("Данные отсортированы.");
-	printf("***************************************************************\n");
+	return number;
+}
+
+// возвращает число > 0 если дата регистрации userA позже userB,
+// 0 если даты регистрации равны
+// число < 0 если дата регистрации userA раньше userB
+int dateComparator(const user_data* userA, const user_data* userB) {
+	if (userA->data[0] != userB->data[0])
+		return userA->data[0] - userB->data[0];
+	if (userA->data[1] != userB->data[1])
+		return userA->data[1] - userB->data[1];
+	return userA->data[2] - userB->data[2];
+}
+
+// возвращает число > 0 если время регистрации userA позже userB,
+// 0 если даты регистрации равны
+// число < 0 если время регистрации userA раньше userB
+int timeComparator(const user_data* userA, const user_data* userB) {
+	if (userA->timeH != userB->timeH)
+		return userA->timeH - userB->timeH;
+	return userA->timeMin - userB->timeMin;
+}
+
+// сортирует массив пользователей point размером size в соответствии со сравнивающей
+// функцией comparator
+void sort_(user_data* point, int size, int (*comparator)(const void*, const void*)) {
+	qsort(point, size, sizeof(point[0]), comparator);
+}
+
+// сортирует массив пользователей point размером size по дате регистрации
+void sortByDate(user_data* point, int size) {
+	sort_(point, size, dateComparator);
+}
+
+// сортирует массив пользователей point размером size по времени регистрации
+void sortByTime(user_data* point, int size) {
+	sort_(point, size, timeComparator);
 }
