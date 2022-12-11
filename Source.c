@@ -18,6 +18,8 @@ void init(user_data* point, int size, int n);
 int read_file(char* filename);
 void put(user_data* point, int size);
 void write_file(user_data* point, char* filename, int size);
+int add(user_data* point, char* filename, int size, int n);
+int search(user_data* point, char* adress, char* status, int size);
 
 int main() {
 	system("chcp 1251");
@@ -33,10 +35,10 @@ int main() {
 		printf("1) Ввод данных.....\n");
 		printf("2) Чтение данных из файла.....\n");
 		printf("3) Вывод данных на экран.....\n");
-		printf("4) Поиск данных.....\n"); // в процессе
+		printf("4) Поиск данных.....\n");
 		printf("5) Сортировка данных.....\n"); // в процессе
 		printf("6) Запись в файл.....\n");
-		printf("7) Дозапись в файл.....\n"); // в процессе
+		printf("7) Дозапись в файл.....\n");
 		printf("0) Выход из программы.....\n");
 
 		scanf("%d", &action);
@@ -65,6 +67,21 @@ int main() {
 			}
 			put(point, size);
 			break;
+		case 4:
+			system("cls");
+			if (point == NULL) {   // проверяется наличие БД
+				printf("База данных не найдена.\n");
+				break;
+			}
+			printf("Укажите адрес абонента и состояние заявки: ");
+			scanf("%s %s", &adress, &status);
+			printf("***************************************************************\n");
+			int a = search(point, adress, status, size);
+			if (a >= 0) printf("Дата обращения - %d.%d.%d\t Время обращения - %d:%d\t Адрес абонента - %s\t Характер поломки - %s\t Статус заявки - %s");
+			else {
+				printf("Абонент не найден.\n");
+			}
+			break;
 		case 6:
 			system("cls");
 			if (point == NULL) {
@@ -75,9 +92,40 @@ int main() {
 			scanf("%s", &filename);
 			write_file(point, filename, size);
 			break;
+		case 7:
+			if (point == NULL) {
+				printf("База данных не найдена\n");
+				break;
+			}
+			printf("Введите кол-во пользователей, которых необходимо добавить: ");
+			scanf("%d", &number);
+			n = size;
+			size += number;
+			point = (user_data*)realloc(point, size * sizeof(user_data)); //перераспределение памяти
+
+			printf("***************************************************************\n");
+
+			printf("Добавить пользователя\n");
+			printf("...в файл\n");
+			printf("...в БД\n");
+			scanf("%d", &action);
+
+			printf("***************************************************************\n");
+			if (action == 1) { // добавление в файл
+				printf("Введите имя файла для добавления абонента:");
+				scanf("%s", &filename);
+				add(point, filename, size, n);
+			}
+			else if (action == 2) { //добавление в базу данных
+				init(point, size, n);
+			}
+			break;
+		default:
+			printf("Выполнить невозможно.\n");
+			printf("***************************************************************\n");
 		}
 	}
-	printf("***************************************************************\n");
+	return 0;
 }
 
 //функция для заполнения БД
@@ -116,19 +164,23 @@ int read_file(char* filename) {
 	}
 	else {
 		printf("\nОткрыть файл не удалось.\n");
+		system("pause");
 		return -1;
 	}
 	fclose(f); // закрытие файла
+	return 0;
 }
 
-// функция печати
+// функция вывода на экран
 void put(user_data* point, int size) {
+	printf("\tДата обращения\t\tВремя обращения\t\tАдрес абонента\t\tХарактер поломки\t\tСтатус заявки");
 	for (int i = 0; i < size; i++) {
-		printf("%d.%d.%d ", point[i].data[0], point[i].data[1], point[i].data[2]); //дата обращения
-		printf("%d:%d ", point[i].timeH, point[i].timeMin);		   //время обращения
-		printf("%s ", point[i].adress); //адрес абонента
-		printf("%s ", point[i].failures); //характер поломки
-		printf("%s \n", point[i].status); //статус заявки
+		printf("\n\n%d. ", i + 1);
+		printf("\n\t%d.%d.%d\t", point[i].data[0], point[i].data[1], point[i].data[2]); //дата обращения
+		printf("\t%d:%d\t", point[i].timeH, point[i].timeMin);		   //время обращения
+		printf("\t\t%s\t", point[i].adress); //адрес абонента
+		printf("\t%s\t", point[i].failures); //характер поломки
+		printf("\t%s\t", point[i].status); //статус заявки
 		printf("\n");
 	}
 	printf("\t");
@@ -145,7 +197,7 @@ void write_file(user_data* point, char* filename, int size) {
 	else {
 		printf("Файл успешно открыт.\n");
 		for (int i = 0; i < size; i++) {
-			fprintf(f,"\t%2i.\n", i + 1);
+			fprintf(f,"%d)\n", i + 1);
 			fprintf(f,"%d.%d.%d ", point[i].data[0], point[i].data[1], point[i].data[2]); //дата обращения
 			fprintf(f,"%d:%d ", point[i].timeH, point[i].timeMin); //время обращения
 			fprintf(f,"%s ", point[i].adress); //адрес абонента
@@ -159,4 +211,37 @@ void write_file(user_data* point, char* filename, int size) {
 		system("pause");
 	}
 	return 0;
+}
+
+// функция дозаписи
+int add(user_data* point, char* filename, int size, int n) {
+	FILE* f;
+	if ((f = fopen(filename, "a")) == NULL) {
+		fprintf(stderr, "Невозможно открыть файл для записи. \n");
+		return -1; //выход, если ошибка
+	}
+	else {
+		init(point, size, n);
+		for (int i = n; i < size; i++) {
+			fprintf(f, "%d)\n", i + 1);
+			fprintf(f, "%d.%d.%d ", point[i].data[0], point[i].data[1], point[i].data[2]); //дата обращения
+			fprintf(f, "%d:%d ", point[i].timeH, point[i].timeMin); //время обращения
+			fprintf(f, "%s ", point[i].adress); //адрес абонента
+			fprintf(f, "%s ", point[i].failures); //характер поломки
+			fprintf(f, "%s ", point[i].status); //статус заявки
+		}
+	}
+	fclose(f); // закрытие файла
+	return 1;
+}
+
+// функция поиска абонента
+int search(user_data* point, char* adress, char* status, int size) {
+	int number = -1;
+	for (int i = 0; i < size; i++) {
+		if ((strcmp(adress, point[i].adress) == 0) && (strcmp(status, point[i].status) == 0)) { // проверяем строки на соответствие введенным данным
+			number = i; //запоминаем номер
+		}
+	}
+	return number;
 }
