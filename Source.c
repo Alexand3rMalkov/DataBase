@@ -14,12 +14,14 @@ typedef struct {
 	char status[50]; // состояние заявки
 }user_data;
 
+//список функций
 void init(user_data* point, int size, int n);
 int read_file(char* filename);
 void put(user_data* point, int size);
 void write_file(user_data* point, char* filename, int size);
 int add(user_data* point, char* filename, int size, int n);
 int search(user_data* point, char* adress, char* status, int size);
+void sort(user_data* point, int size);
 
 int main() {
 	system("chcp 1251");
@@ -32,17 +34,16 @@ int main() {
 	while (1) {
 		printf("\tМеню\n");
 		printf("\nВыберите действие:\n");
-		printf("1) Ввод данных.....\n");
-		printf("2) Чтение данных из файла.....\n");
+		printf("1) Ввод данных.....\n"); 
+		printf("2) Чтение данных из файла.....\n"); //finally worked...
 		printf("3) Вывод данных на экран.....\n");
-		printf("4) Поиск данных.....\n");
-		printf("5) Сортировка данных.....\n"); // в процессе
-		printf("6) Запись в файл.....\n");
-		printf("7) Дозапись в файл.....\n");
+		printf("4) Поиск данных.....\n"); //и тут еще не сработало
+		printf("5) Сортировка данных.....\n"); // всё еще не сработало
+		printf("6) Запись в файл.....\n"); //finally worked...
+		printf("7) Дозапись в файл.....\n"); //finally worked...
 		printf("0) Выход из программы.....\n");
 
 		scanf("%d", &action);
-
 		switch (action) {
 		case 0:
 			return -1; // выход из программы
@@ -55,7 +56,6 @@ int main() {
 			init(point, size, n);
 			break;
 		case 2:
-			system("cls");
 			printf("Введите имя файла, который необходимо прочитать: ");
 			scanf("%s", &filename);
 			read_file(filename);
@@ -81,6 +81,13 @@ int main() {
 			else {
 				printf("Абонент не найден.\n");
 			}
+			break;
+		case 5:
+			if (point == NULL) {
+				printf("База данных не найдена.\n");
+				break;
+			}
+			sort(point, size);
 			break;
 		case 6:
 			system("cls");
@@ -150,21 +157,18 @@ void init(user_data* point, int size, int n) {
 //функция чтения из файла
 int read_file(char* filename) {
 	FILE* f; // объявляем переменную
-	char file[120]; // массив для хранения строки из файла
+	char file[200]; // массив для хранения строки из файла
 	f = fopen(filename, "r");
 	if (f != NULL) {
-		printf("Файл успешно открыт.");
+		printf("\nФайл открыт.\n");
 		while (!feof(f)) {
-			fgets(file, 120, f);
-			if (!feof(f)) {
+			fgets(file, 200, f);
 				puts(file);
-			}
 		}
 		return 1;
 	}
 	else {
 		printf("\nОткрыть файл не удалось.\n");
-		system("pause");
 		return -1;
 	}
 	fclose(f); // закрытие файла
@@ -197,12 +201,12 @@ void write_file(user_data* point, char* filename, int size) {
 	else {
 		printf("Файл успешно открыт.\n");
 		for (int i = 0; i < size; i++) {
-			fprintf(f,"%d)\n", i + 1);
+			fprintf(f, "\n");
 			fprintf(f,"%d.%d.%d ", point[i].data[0], point[i].data[1], point[i].data[2]); //дата обращения
 			fprintf(f,"%d:%d ", point[i].timeH, point[i].timeMin); //время обращения
 			fprintf(f,"%s ", point[i].adress); //адрес абонента
 			fprintf(f,"%s ", point[i].failures); //характер поломки
-			fprintf(f,"%s ", point[i].status); //статус заявки
+			fprintf(f,"%s", point[i].status); //статус заявки
 			system("pause");
 		}
 		fclose(f); // закрытие файла
@@ -244,4 +248,38 @@ int search(user_data* point, char* adress, char* status, int size) {
 		}
 	}
 	return number;
+}
+
+// функция сортировки по времени и дате
+void sort(user_data* point, int size) {
+	user_data keep;
+	//сортировка по дате
+	for (int i = 0; i < size; i++) {
+		for (int j = i + 1; j < size; i++) {
+			if (point[i].data[2] + point[i].data[1] + point[i].data[0] > point[j].data[2] + point[j].data[1] + point[j].data[0]) {
+				keep = point[j];
+				point[j] = point[i];
+				point[i] = keep;
+			}
+		}
+	}
+	//сортировка по времени, есди дата совпадает
+	for (int i = 0; i < size - 1; i++) {
+		if ((point[i].data[2] == point[i + 1].data[2]) && (point[i].data[1] == point[i + 1].data[1]) && (point[i].data[0] == point[i + 1].data[0])) {
+			if (point[i].timeH == point[i + 1].timeH) {
+				if (point[i].timeMin == point[i + 1].timeMin) {
+					keep = point[i + 1];
+					point[i + 1] = point[i];
+					point[i] = keep;
+				}
+			}
+			else if (point[i].timeH > point[i + 1].timeH) {
+				keep = point[i + 1];
+				point[i + 1] = point[i];
+				point[i] = keep;
+			}
+		}
+	}
+	printf("Данные отсортированы.");
+	printf("***************************************************************\n");
 }
