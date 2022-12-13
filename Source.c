@@ -3,7 +3,7 @@
 #include <malloc.h>  // библиотека для использования функции выделения памяти
 #include <windows.h> // для задания языка консоли
 #include <string.h>  // для работы со строками
-#include <stdlib.h>  // для работы со стандартной библиотекой
+#include <stdlib.h> // для работы со стандартной библиотекой
 
 typedef struct {
 	int data[3]; // день, месяц, год
@@ -15,7 +15,7 @@ typedef struct {
 }user_data;
 
 //список функций
-void init(user_data* point, int size, int n);
+void init(user_data* point, int size);
 user_data* read_file(char* filename, int* size);
 void put(user_data* point, int size);
 void write_file(user_data* point, char* filename, int size);
@@ -61,14 +61,13 @@ int main() {
 			printf("Введите кол-во записей: ");
 			scanf("%d", &size); // ввод
 			point = (user_data*)malloc(size * sizeof(user_data)); // выделение памяти
-			n = 0;
-			init(point, size, n);
+			init(point, size);
 			break;
 		case 2:
 			printf("Введите имя файла, который необходимо прочитать: ");
 			scanf("%s", &filename);
 			point = read_file(filename, &size);
-			printf("Считано %d строк.\n", size);
+			printf("Считано %d строк\n", size);
 			put(point, size);
 			break;
 		case 3:
@@ -88,9 +87,16 @@ int main() {
 			scanf("%s", &adress);
 			printf("***************************************************************\n");
 			int a = searchByAddress(point, adress, size);
-			if (a >= 0) printf("Дата обращения - %d.%d.%d\t Время обращения - %d:%d\t Адрес абонента - %s\t Характер поломки - %s\t Статус заявки - %s");
+			if (a >= 0) {
+				printf("Дата обращения: %d.%d.%d\n", point[a].data[0], point[a].data[1], point[a].data[2]);
+				printf("Время обращения: %d:%d\n", point[a].timeH, point[a].timeMin);
+				printf("Адрес абонента: %s\n", &point[a].adress);
+				printf("Характер поломки: %s\n", &point[a].failures);
+				printf("Статус заявки: %s\n", &point[a].status);
+			}
 			else {
 				printf("Абонент не найден.\n");
+				printf("***************************************************************\n");
 			}
 			break;
 		case 5:
@@ -103,9 +109,16 @@ int main() {
 			scanf("%s", &status);
 			printf("***************************************************************\n");
 			int b = searchByStatus(point, status, size);
-			if (b >= 0) printf("Дата обращения - %d.%d.%d\t Время обращения - %d:%d\t Адрес абонента - %s\t Характер поломки - %s\t Статус заявки - %s");
+			if (b >= 0) {
+				printf("Дата обращения: %d.%d.%d\n", point[b].data[0], point[b].data[1], point[b].data[2]);
+				printf("Время обращения: %d:%d\n", point[b].timeH, point[b].timeMin);
+				printf("Адрес абонента: %s\n", &point[b].adress);
+				printf("Характер поломки: %s\n", &point[b].failures);
+				printf("Статус заявки: %s\n", &point[b].status);
+			}
 			else {
 				printf("Абонент не найден.\n");
+				printf("***************************************************************\n");
 			}
 			break;
 		case 6:
@@ -169,8 +182,8 @@ int main() {
 }
 
 //функция для заполнения БД
-void init(user_data* point, int size, int n) {
-	for (int i = n; i < size; i++) {
+void init(user_data* point, int size) {
+	for (int i = 0; i < size; i++) {
 		printf("***************************************************************\n");
 		printf("Введите дату обращения: ");
 		scanf("%d.%d.%d", &point[i].data[0], &point[i].data[1], &point[i].data[2]);
@@ -184,7 +197,7 @@ void init(user_data* point, int size, int n) {
 		scanf("%s", &point[i].status);
 		printf("***************************************************************\n");
 	}
-	return point;
+	return size;
 }
 
 //функция чтения из файла
@@ -193,15 +206,15 @@ user_data* read_file(char* filename, int* size) {
 	int number_field = 0;	// номер поля за записи
 	int ind = 0;		// номер строки
 	user_data* list = (user_data*)malloc(1000 * sizeof(user_data*));
-	char file[200]; // массив для хранения строки из файла
+	char buffer[200]; // массив для хранения строки из файла
 	f = fopen(filename, "r");
 	if (f != NULL) {
 		printf("\nФайл открыт.\n");
 		while (!feof(f)) {
-			fgets(file, 200, f);
-			if (file[0] == '\n')
+			fgets(buffer, 200, f);
+			if (buffer[0] == '\n')
 				continue;
-			sscanf(file, "%d.%d.%d %d:%d %s %s %s",
+			sscanf(buffer, "%d.%d.%d %d:%d %s %s %s",
 				&list[ind].data[0],
 				&list[ind].data[1],
 				&list[ind].data[2],
@@ -267,15 +280,15 @@ void write_file(user_data* point, char* filename, int size) {
 }
 
 // функция дозаписи
-int add(user_data* point, char* filename, int size, int n) {
+int add(user_data* point, char* filename, int size) {
 	FILE* f;
 	if ((f = fopen(filename, "a")) == NULL) {
 		fprintf(stderr, "Невозможно открыть файл для записи. \n");
 		return -1; //выход, если ошибка
 	}
 	else {
-		init(point, size, n);
-		for (int i = n; i < size; i++) {
+		init(point, size);
+		for (int i = 0; i < size; i++) {
 			fprintf(f, "%d)\n", i + 1);
 			fprintf(f, "%d.%d.%d ", point[i].data[0], point[i].data[1], point[i].data[2]); //дата обращения
 			fprintf(f, "%d:%d ", point[i].timeH, point[i].timeMin); //время обращения
