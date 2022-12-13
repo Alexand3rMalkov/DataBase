@@ -15,11 +15,11 @@ typedef struct {
 }user_data;
 
 //список функций
-void init(user_data* point, int size);
+int init(user_data* point, int size);
 user_data* read_file(char* filename, int* size);
 void put(user_data* point, int size);
-void write_file(user_data* point, char* filename, int size);
-int add(user_data* point, char* filename, int size, int n);
+int write_file(user_data* point, char* filename, int size);
+int add(user_data* point, char* filename, int size);
 int searchByAddress(user_data* point, char* address, int size);
 int searchByStatus(user_data* point, char* status, int size);
 //компараторы для работы сортировок
@@ -182,7 +182,7 @@ int main() {
 }
 
 //функция для заполнения БД
-void init(user_data* point, int size) {
+int init(user_data* point, int size) {
 	for (int i = 0; i < size; i++) {
 		printf("***************************************************************\n");
 		printf("Введите дату обращения: ");
@@ -241,8 +241,8 @@ user_data* read_file(char* filename, int* size) {
 void put(user_data* point, int size) {
 	printf("\tДата обращения\t\tВремя обращения\t\tАдрес абонента\t\tХарактер поломки\t\tСтатус заявки");
 	for (int i = 0; i < size; i++) {
-		printf("\n\n%d. ", i + 1);
-		printf("\n\t%d.%d.%d\t", point[i].data[0], point[i].data[1], point[i].data[2]); //дата обращения
+		printf("\n%d.", i + 1);
+		printf("\t%d.%d.%d\t", point[i].data[0], point[i].data[1], point[i].data[2]); //дата обращения
 		printf("\t%d:%d\t", point[i].timeH, point[i].timeMin);		   //время обращения
 		printf("\t\t%s\t", point[i].adress); //адрес абонента
 		printf("\t%s\t", point[i].failures); //характер поломки
@@ -253,7 +253,7 @@ void put(user_data* point, int size) {
 }
 
 // функция записи в файл
-void write_file(user_data* point, char* filename, int size) {
+int write_file(user_data* point, char* filename, int size) {
 	FILE* f;
 	if ((f = fopen(filename, "w")) == NULL) { //проверяем возможность открыть файл
 		printf("Невозможно открыть файл для записи. \n");
@@ -263,7 +263,6 @@ void write_file(user_data* point, char* filename, int size) {
 	else {
 		printf("Файл успешно открыт.\n");
 		for (int i = 0; i < size; i++) {
-			fprintf(f, "\n");
 			fprintf(f, "%d.%d.%d ", point[i].data[0], point[i].data[1], point[i].data[2]); //дата обращения
 			fprintf(f, "%d:%d ", point[i].timeH, point[i].timeMin); //время обращения
 			fprintf(f, "%s ", point[i].adress); //адрес абонента
@@ -280,23 +279,21 @@ void write_file(user_data* point, char* filename, int size) {
 }
 
 // функция дозаписи
-int add(user_data* point, char* filename, int size) {
-	FILE* f;
-	if ((f = fopen(filename, "a")) == NULL) {
-		fprintf(stderr, "Невозможно открыть файл для записи. \n");
-		return -1; //выход, если ошибка
-	}
-	else {
-		init(point, size);
-		for (int i = 0; i < size; i++) {
-			fprintf(f, "%d)\n", i + 1);
-			fprintf(f, "%d.%d.%d ", point[i].data[0], point[i].data[1], point[i].data[2]); //дата обращения
-			fprintf(f, "%d:%d ", point[i].timeH, point[i].timeMin); //время обращения
-			fprintf(f, "%s ", point[i].adress); //адрес абонента
-			fprintf(f, "%s ", point[i].failures); //характер поломки
-			fprintf(f, "%s ", point[i].status); //статус заявки
-		}
-	}
+int add(user_data* point, char* filename, int size) {										//
+	FILE* f;														//	
+	if ((f = fopen(filename, "a")) == NULL) {										//
+		fprintf(stderr, "Невозможно открыть файл для записи. \n");							//
+		return -1; //выход, если ошибка											// не работает
+	}															//
+	else {															//
+		for (int i = 0; i < size; i++) {										//
+			fprintf(f, "%d.%d.%d", point[i].data[0], point[i].data[1], point[i].data[2]); //дата обращения		//
+			fprintf(f, "%d:%d", point[i].timeH, point[i].timeMin); //время обращения				//
+			fprintf(f, "%s", point[i].adress); //адрес абонента							//
+			fprintf(f, "%s", point[i].failures); //характер поломки							//
+			fprintf(f, "%s\n", point[i].status); //статус заявки							//
+		}														//
+	}															//
 	fclose(f); // закрытие файла
 	return 1;
 }
