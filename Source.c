@@ -3,10 +3,10 @@
 #include <malloc.h>  // библиотека для использования функции выделения памяти
 #include <windows.h> // для задания языка консоли
 #include <string.h>  // для работы со строками
-#include <stdlib.h>
+#include <stdlib.h>  // для работы со стандартной библиотекой
 
 typedef struct {
-	int data[3]; // год, месяц, день
+	int data[3]; // день, месяц, год
 	int timeH;   // часы
 	int timeMin; // минуты
 	char adress[50]; // адрес абонента
@@ -16,7 +16,7 @@ typedef struct {
 
 //список функций
 void init(user_data* point, int size, int n);
-int read_file(char* filename);
+user_data* read_file(char* filename, int* size);
 void put(user_data* point, int size);
 void write_file(user_data* point, char* filename, int size);
 int add(user_data* point, char* filename, int size, int n);
@@ -25,7 +25,7 @@ int searchByStatus(user_data* point, char* status, int size);
 //компараторы для работы сортировок
 int dateComparator(const user_data* userA, const user_data* userB);
 int timeComparator(const user_data* userA, const user_data* userB);
-void sort_(user_data* point, int size, int (*comparator)(const void*, const void*));
+void sort_(user_data* point, int size, int(*comparator)(const void*, const void*));
 //сортировки
 void sortByDate(user_data* point, int size);
 void sortByTime(user_data* point, int size);
@@ -67,7 +67,8 @@ int main() {
 		case 2:
 			printf("Введите имя файла, который необходимо прочитать: ");
 			scanf("%s", &filename);
-			read_file(filename);
+			point = read_file(filename, &size);
+			printf("Считано %d строк.\n", size);
 			break;
 		case 3:
 			if (point == NULL) {   // проверяется наличие БД
@@ -186,24 +187,40 @@ void init(user_data* point, int size, int n) {
 }
 
 //функция чтения из файла
-int read_file(char* filename) {
+user_data* read_file(char* filename, int* size) {
 	FILE* f; // объявляем переменную
+	int number_field = 0;	// номер поля за записи
+	int ind = 0;		// номер строки
+	user_data* list = (user_data*)malloc(1000 * sizeof(user_data*));
 	char file[200]; // массив для хранения строки из файла
 	f = fopen(filename, "r");
 	if (f != NULL) {
 		printf("\nФайл открыт.\n");
 		while (!feof(f)) {
 			fgets(file, 200, f);
-			puts(file);
+			if (file[0] == '\n')
+				continue;
+			sscanf(file, "%d.%d.%d %d:%d %s %s %s",
+				&list[ind].data[0],
+				&list[ind].data[1],
+				&list[ind].data[2],
+				&list[ind].timeH,
+				&list[ind].timeMin,
+				list[ind].adress,
+				list[ind].failures,
+				list[ind].status);
+			ind++;
 		}
-		return 1;
+		*size = ind;	// возвращаем число записей
+		return list;
 	}
 	else {
 		printf("\nОткрыть файл не удалось.\n");
-		return -1;
+		return NULL;
 	}
 	fclose(f); // закрытие файла
-	return 0;
+
+	return NULL;
 }
 
 // функция вывода на экран
@@ -316,7 +333,7 @@ int timeComparator(const user_data* userA, const user_data* userB) {
 
 // сортирует массив пользователей point размером size в соответствии со сравнивающей
 // функцией comparator
-void sort_(user_data* point, int size, int (*comparator)(const void*, const void*)) {
+void sort_(user_data* point, int size, int(*comparator)(const void*, const void*)) {
 	qsort(point, size, sizeof(point[0]), comparator);
 }
 
