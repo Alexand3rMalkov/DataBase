@@ -69,6 +69,7 @@ int main() {
 			scanf("%s", &filename);
 			point = read_file(filename, &size);
 			printf("Считано %d строк.\n", size);
+			put(point, size);
 			break;
 		case 3:
 			if (point == NULL) {   // проверяется наличие БД
