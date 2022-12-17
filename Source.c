@@ -15,11 +15,11 @@ typedef struct {
 }user_data;
 
 //список функций
-int init(user_data* point, int size);
+int init(user_data* point, int size, int n);
 user_data* read_file(char* filename, int* size);
 void put(user_data* point, int size);
 int write_file(user_data* point, char* filename, int size);
-int add(user_data* point, char* filename, int size);
+int add(user_data* point, char* filename, int size, int n);
 int searchByAddress(user_data* point, char* address, int size);
 int searchByStatus(user_data* point, char* status, int size);
 //компараторы для работы сортировок
@@ -61,7 +61,8 @@ int main() {
 			printf("Введите кол-во записей: ");
 			scanf("%d", &size); // ввод
 			point = (user_data*)malloc(size * sizeof(user_data)); // выделение памяти
-			init(point, size);
+			n = 0;
+			init(point, size, n);
 			break;
 		case 2:
 			printf("Введите имя файла, который необходимо прочитать: ");
@@ -182,8 +183,8 @@ int main() {
 }
 
 //функция для заполнения БД
-int init(user_data* point, int size) {
-	for (int i = 0; i < size; i++) {
+int init(user_data* point, int size, int n) {
+	for (int i = n; i < size; i++) {
 		printf("***************************************************************\n");
 		printf("Введите дату обращения: ");
 		scanf("%d.%d.%d", &point[i].data[0], &point[i].data[1], &point[i].data[2]);
@@ -197,7 +198,7 @@ int init(user_data* point, int size) {
 		scanf("%s", &point[i].status);
 		printf("***************************************************************\n");
 	}
-	return size;
+	return point;
 }
 
 //функция чтения из файла
@@ -233,7 +234,6 @@ user_data* read_file(char* filename, int* size) {
 		return NULL;
 	}
 	fclose(f); // закрытие файла
-
 	return NULL;
 }
 
@@ -241,8 +241,8 @@ user_data* read_file(char* filename, int* size) {
 void put(user_data* point, int size) {
 	printf("\tДата обращения\t\tВремя обращения\t\tАдрес абонента\t\tХарактер поломки\t\tСтатус заявки");
 	for (int i = 0; i < size; i++) {
-		printf("\n%d.", i + 1);
-		printf("\t%d.%d.%d\t", point[i].data[0], point[i].data[1], point[i].data[2]); //дата обращения
+		printf("\n\n%d. ", i + 1);
+		printf("\n\t%d.%d.%d\t", point[i].data[0], point[i].data[1], point[i].data[2]); //дата обращения
 		printf("\t%d:%d\t", point[i].timeH, point[i].timeMin);		   //время обращения
 		printf("\t\t%s\t", point[i].adress); //адрес абонента
 		printf("\t%s\t", point[i].failures); //характер поломки
@@ -279,24 +279,27 @@ int write_file(user_data* point, char* filename, int size) {
 }
 
 // функция дозаписи
-int add(user_data* point, char* filename, int size) {										//
-	FILE* f;														//	
-	if ((f = fopen(filename, "a")) == NULL) {										//
-		fprintf(stderr, "Невозможно открыть файл для записи. \n");							//
-		return -1; //выход, если ошибка											// не работает
-	}															//
-	else {															//
-		for (int i = 0; i < size; i++) {										//
-			fprintf(f, "%d.%d.%d", point[i].data[0], point[i].data[1], point[i].data[2]); //дата обращения		//
-			fprintf(f, "%d:%d", point[i].timeH, point[i].timeMin); //время обращения				//
-			fprintf(f, "%s", point[i].adress); //адрес абонента							//
-			fprintf(f, "%s", point[i].failures); //характер поломки							//
-			fprintf(f, "%s\n", point[i].status); //статус заявки							//
-		}														//
-	}															//
+int add(user_data* point, char* filename, int size, int n) {
+	FILE* f;
+	if ((f = fopen(filename, "a")) == NULL) {
+		fprintf(stderr, "Невозможно открыть файл для записи. \n");
+		return -1; //выход, если ошибка
+	}
+	else {
+		init(point, size, n);
+		for (int i = n; i < size; i++) {
+			fprintf(f, "\n");
+			fprintf(f, "%d.%d.%d ", point[i].data[0], point[i].data[1], point[i].data[2]); //дата обращения
+			fprintf(f, "%d:%d ", point[i].timeH, point[i].timeMin); //время обращения
+			fprintf(f, "%s ", point[i].adress); //адрес абонента
+			fprintf(f, "%s ", point[i].failures); //характер поломки
+			fprintf(f, "%s ", point[i].status); //статус заявки
+		}
+	}
 	fclose(f); // закрытие файла
 	return 1;
 }
+
 
 // возвращает индекс первого найденного с начала абонента из массива
 // point размером size адрес которого равен address
@@ -344,7 +347,7 @@ int timeComparator(const user_data* userA, const user_data* userB) {
 
 // сортирует массив пользователей point размером size в соответствии со сравнивающей
 // функцией comparator
-void sort_(user_data* point, int size, int(*comparator)(const void*, const void*)) {
+void sort_(user_data* point, int size, int (*comparator)(const void*, const void*)) {
 	qsort(point, size, sizeof(point[0]), comparator);
 }
 
