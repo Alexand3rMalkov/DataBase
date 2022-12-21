@@ -329,11 +329,11 @@ int searchByStatus(user_data* point, char* status, int size) {
 // 0 если даты регистрации равны
 // число < 0 если дата регистрации userA раньше userB
 int dateComparator(const user_data* userA, const user_data* userB) {
-	if (userA->data[0] != userB->data[0])
-		return userA->data[0] - userB->data[0];
+	if (userA->data[2] != userB->data[2])
+		return userA->data[2] - userB->data[2];
 	if (userA->data[1] != userB->data[1])
 		return userA->data[1] - userB->data[1];
-	return userA->data[2] - userB->data[2];
+	return userA->data[0] - userB->data[0];
 }
 
 // возвращает число > 0 если время регистрации userA позже userB,
