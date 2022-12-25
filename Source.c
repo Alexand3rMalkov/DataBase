@@ -239,13 +239,13 @@ user_data* read_file(char* filename, int* size) {
 
 // функция вывода на экран
 void put(user_data* point, int size) {
-	printf("\tДата обращения\t\tВремя обращения\t\tАдрес абонента\t\tХарактер поломки\t\tСтатус заявки");
+	printf("\tДата обращения\t\tВремя обращения\t\tАдрес абонента\t\t\tХарактер поломки\t\tСтатус заявки");
 	for (int i = 0; i < size; i++) {
 		printf("\n\n%d. ", i + 1);
 		printf("\n\t%d.%d.%d\t", point[i].data[0], point[i].data[1], point[i].data[2]); //дата обращения
 		printf("\t%d:%d\t", point[i].timeH, point[i].timeMin);		   //время обращения
 		printf("\t\t%s\t", point[i].adress); //адрес абонента
-		printf("\t%s\t", point[i].failures); //характер поломки
+		printf("\t\t%s\t", point[i].failures); //характер поломки
 		printf("\t%s\t", point[i].status); //статус заявки
 		printf("\n");
 	}
