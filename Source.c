@@ -20,7 +20,7 @@ user_data* read_file(char* filename, int* size);
 void put(user_data* point, int size);
 int write_file(user_data* point, char* filename, int size);
 int add(user_data* point, char* filename, int size, int n);
-int searchByAddress(user_data* point, char* address, int size);
+int searchByAdress(user_data* point, char* adress, int size);
 int searchByStatus(user_data* point, char* status, int size);
 //компараторы для работы сортировок
 int dateComparator(const user_data* userA, const user_data* userB);
@@ -87,7 +87,7 @@ int main() {
 			printf("Укажите адрес абонента: ");
 			scanf("%s", &adress);
 			printf("***************************************************************\n");
-			int a = searchByAddress(point, adress, size);
+			int a = searchByAdress(point, adress, size);
 			if (a >= 0) {
 				printf("Дата обращения: %d.%d.%d\n", point[a].data[0], point[a].data[1], point[a].data[2]);
 				printf("Время обращения: %d:%d\n", point[a].timeH, point[a].timeMin);
@@ -303,10 +303,10 @@ int add(user_data* point, char* filename, int size, int n) {
 
 // возвращает индекс первого найденного с начала абонента из массива
 // point размером size адрес которого равен address
-int searchByAddress(user_data* point, char* address, int size) {
+int searchByAdress(user_data* point, char* adress, int size) {
 	int number = -1;
 	for (int i = 0; i < size; i++) {
-		if (strcmp(address, point[i].adress) == 0) { // проверяем строки на соответствие введенным данным
+		if (strcmp(adress, point[i].adress) == 0) { // проверяем строки на соответствие введенным данным
 			return i; //возвращаем номер
 		}
 	}
