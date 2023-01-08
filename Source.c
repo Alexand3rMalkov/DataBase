@@ -345,18 +345,12 @@ int timeComparator(const user_data* userA, const user_data* userB) {
 	return userA->timeMin - userB->timeMin;
 }
 
-// сортирует массив пользователей point размером size в соответствии со сравнивающей
-// функцией comparator
-void sort_(user_data* point, int size, int (*comparator)(const void*, const void*)) {
-	qsort(point, size, sizeof(point[0]), comparator);
-}
-
 // сортирует массив пользователей point размером size по дате регистрации
 void sortByDate(user_data* point, int size) {
-	sort_(point, size, dateComparator);
+	qsort(point, size, sizeof(point[0]), dateComparator);
 }
 
 // сортирует массив пользователей point размером size по времени регистрации
 void sortByTime(user_data* point, int size) {
-	sort_(point, size, timeComparator);
+	qsort(point, size, sizeof(point[0]), timeComparator);
 }
