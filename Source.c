@@ -145,8 +145,6 @@ int main() {
 			printf("Введите имя файла для записи: ");
 			scanf("%s", &filename);
 			write_file(point, filename, size);
-			free(point, size);
-			point, size = NULL;
 			break;
 		case 9:
 			if (point == NULL) {
